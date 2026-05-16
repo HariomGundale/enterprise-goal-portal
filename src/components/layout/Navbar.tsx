@@ -1,0 +1,62 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Bell, LogOut, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ROLE_LABELS } from "@/constants/navigation";
+import type { SessionUser } from "@/types";
+import { toast } from "sonner";
+
+interface NavbarProps {
+  user: SessionUser;
+  title: string;
+  onMenuClick?: () => void;
+}
+
+export function Navbar({ user, title, onMenuClick }: NavbarProps) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+      router.refresh();
+    } catch {
+      toast.error("Failed to sign out");
+    }
+  }
+
+  return (
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:px-6">
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={onMenuClick}
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-lg font-semibold text-neutral-900">{title}</h1>
+          <p className="text-xs text-neutral-500">FY2025 · Q2 Active</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" aria-label="Notifications">
+          <Bell className="h-5 w-5" />
+        </Button>
+        <Badge variant="secondary" className="hidden sm:inline-flex">
+          {ROLE_LABELS[user.role]}
+        </Badge>
+        <Button variant="outline" size="sm" onClick={handleLogout}>
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">Sign out</span>
+        </Button>
+      </div>
+    </header>
+  );
+}
