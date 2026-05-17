@@ -10,4 +10,10 @@ export const QUERY_KEYS = {
   myCheckIns: (userId: string) => ["checkIns", "my", userId] as const,
   teamCheckIns: (managerId: string, employeeId?: string) =>
     ["checkIns", "team", managerId, employeeId ?? "list"] as const,
+  adminOverview: ["admin", "overview"] as const,
+  adminUsers: (filters: string) => ["admin", "users", filters] as const,
+  adminDepartments: ["admin", "departments"] as const,
+  adminCycles: ["admin", "cycles"] as const,
+  adminUnlockSheets: ["admin", "unlockSheets"] as const,
+  sharedGoals: (userId: string) => ["sharedGoals", userId] as const,
 };

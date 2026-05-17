@@ -1,10 +1,5 @@
-import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
+import { AnalyticsPageClient } from "@/components/analytics/AnalyticsPageClient";
 
 export default function AnalyticsPage() {
-  return (
-    <PlaceholderPage
-      title="Analytics"
-      description="Performance analytics charts will be implemented in Phase 4."
-    />
-  );
+  return <AnalyticsPageClient />;
 }

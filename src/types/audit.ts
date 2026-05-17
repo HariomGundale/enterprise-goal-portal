@@ -10,9 +10,25 @@ export type AuditAction =
   | "GOAL_RETURNED"
   | "GOAL_LOCKED"
   | "CHECKIN_UPDATED"
-  | "CHECKIN_REVIEWED";
+  | "CHECKIN_REVIEWED"
+  | "USER_UPDATED"
+  | "DEPARTMENT_CREATED"
+  | "DEPARTMENT_UPDATED"
+  | "CYCLE_CREATED"
+  | "CYCLE_UPDATED"
+  | "CYCLE_ARCHIVED"
+  | "GOAL_SHEET_UNLOCKED"
+  | "SHARED_GOAL_CREATED"
+  | "SHARED_GOAL_LINKED";
 
-export type AuditEntity = "goalSheet" | "goal" | "cycle" | "checkIn";
+export type AuditEntity =
+  | "goalSheet"
+  | "goal"
+  | "cycle"
+  | "checkIn"
+  | "user"
+  | "department"
+  | "sharedGoal";
 
 export interface AuditActor {
   userId: string;

@@ -1,10 +1,17 @@
 import type { GoalSheetStatus, ProgressStatus, Quarter, UoMType } from "@/types";
 import type {
+  AdminDepartmentDto,
+  AdminUserDto,
+  AuditActivityDto,
+  CycleAdminDto,
   CycleDto,
+  CycleQuarterDto,
   GoalDto,
   GoalSheetDto,
   GoalSheetSummaryDto,
   QuarterlyCheckInDto,
+  SharedGoalDto,
+  SharedGoalRecipientDto,
 } from "@/types/api";
 
 type DocLike = {
@@ -114,6 +121,120 @@ export function serializeQuarterlyCheckIn(doc: unknown): QuarterlyCheckInDto {
     reviewedAt: conductedAt ? new Date(conductedAt).toISOString() : null,
     createdAt: new Date(u.createdAt as Date).toISOString(),
     updatedAt: new Date(u.updatedAt as Date).toISOString(),
+  };
+}
+
+function isWindowOpen(start: Date, end: Date, now = new Date()): boolean {
+  return now >= new Date(start) && now <= new Date(end);
+}
+
+export function serializeCycleAdmin(cycle: unknown, now = new Date()): CycleAdminDto {
+  const c = toPlain(cycle);
+  const window = c.goalSettingWindow as { startDate: Date; endDate: Date };
+  const quartersRaw = (c.quarters ?? []) as {
+    quarter: Quarter;
+    startDate: Date;
+    endDate: Date;
+    checkInWindow: { startDate: Date; endDate: Date };
+  }[];
+
+  const quarters: CycleQuarterDto[] = quartersRaw.map((q) => ({
+    quarter: q.quarter,
+    startDate: new Date(q.startDate).toISOString(),
+    endDate: new Date(q.endDate).toISOString(),
+    checkInWindow: {
+      startDate: new Date(q.checkInWindow.startDate).toISOString(),
+      endDate: new Date(q.checkInWindow.endDate).toISOString(),
+    },
+    isCheckInWindowOpen: isWindowOpen(q.checkInWindow.startDate, q.checkInWindow.endDate, now),
+  }));
+
+  return {
+    id: getId(cycle),
+    name: String(c.name),
+    financialYear: String(c.financialYear),
+    status: String(c.status),
+    goalSettingWindow: {
+      startDate: new Date(window.startDate).toISOString(),
+      endDate: new Date(window.endDate).toISOString(),
+    },
+    isGoalWindowOpen: isWindowOpen(window.startDate, window.endDate, now),
+    quarters,
+  };
+}
+
+export function serializeAuditActivity(doc: unknown): AuditActivityDto {
+  const a = toPlain(doc);
+  return {
+    id: getId(doc),
+    action: String(a.action),
+    entity: String(a.entity),
+    entityId: String(a.entityId),
+    userEmail: String(a.userEmail),
+    userRole: String(a.userRole),
+    timestamp: new Date(a.timestamp as Date).toISOString(),
+  };
+}
+
+export function serializeAdminUser(
+  user: unknown,
+  department: { id: string; name: string; code: string },
+  manager?: { id: string; name: string } | null,
+): AdminUserDto {
+  const u = toPlain(user);
+  return {
+    id: getId(user),
+    employeeId: String(u.employeeId),
+    name: String(u.name),
+    email: String(u.email),
+    role: u.role as AdminUserDto["role"],
+    department,
+    manager: manager ?? null,
+    isActive: Boolean(u.isActive),
+    lastLogin: u.lastLogin ? new Date(u.lastLogin as Date).toISOString() : null,
+  };
+}
+
+export function serializeAdminDepartment(
+  dept: unknown,
+  head: { id: string; name: string; email: string } | null,
+  memberCount: number,
+): AdminDepartmentDto {
+  const d = toPlain(dept);
+  return {
+    id: getId(dept),
+    name: String(d.name),
+    code: String(d.code),
+    head,
+    memberCount,
+  };
+}
+
+export function serializeSharedGoal(
+  doc: unknown,
+  department: { id: string; name: string },
+  recipients: SharedGoalRecipientDto[],
+): SharedGoalDto {
+  const s = toPlain(doc);
+  const target = Number(s.target);
+  const achievement = Number(s.currentAchievement ?? 0);
+  const progressPercent =
+    target > 0 ? Math.min(100, Math.round((achievement / target) * 100)) : 0;
+
+  return {
+    id: getId(doc),
+    title: String(s.title),
+    description: String(s.description ?? ""),
+    thrustArea: String(s.thrustArea),
+    uomType: s.uomType as SharedGoalDto["uomType"],
+    target,
+    deadline: new Date(s.deadline as Date).toISOString(),
+    department,
+    currentAchievement: achievement,
+    progressPercent,
+    recipientCount: recipients.length,
+    recipients,
+    createdAt: new Date(s.createdAt as Date).toISOString(),
   };
 }
 

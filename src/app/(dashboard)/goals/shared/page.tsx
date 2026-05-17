@@ -1,10 +1,5 @@
-import { PlaceholderPage } from "@/components/shared/PlaceholderPage";
+import { SharedGoalsPageClient } from "@/components/shared-goals/SharedGoalsPageClient";
 
 export default function SharedGoalsPage() {
-  return (
-    <PlaceholderPage
-      title="Shared Goals"
-      description="Department shared goals will be implemented in Phase 4."
-    />
-  );
+  return <SharedGoalsPageClient />;
 }
