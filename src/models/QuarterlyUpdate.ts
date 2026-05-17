@@ -14,6 +14,7 @@ const quarterlyUpdateSchema = new Schema(
     },
     plannedTarget: { type: Number, required: true },
     actualAchievement: { type: Number, default: null },
+    progressPercent: { type: Number, min: 0, max: 100, default: null },
     progressStatus: {
       type: String,
       enum: ["not_started", "on_track", "completed"] satisfies ProgressStatus[],

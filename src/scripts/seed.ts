@@ -98,8 +98,11 @@ async function seed() {
   await engineering.save();
   await hr.save();
 
-  const fyStart = new Date("2025-05-01T00:00:00.000Z");
-  const goalWindowEnd = new Date("2025-06-30T23:59:59.999Z");
+  const now = new Date();
+  const fyStart = new Date(now);
+  fyStart.setDate(fyStart.getDate() - 30);
+  const goalWindowEnd = new Date(now);
+  goalWindowEnd.setDate(goalWindowEnd.getDate() + 90);
 
   await Cycle.create({
     orgId: org._id,
