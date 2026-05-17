@@ -10,6 +10,7 @@ import { User } from "@/models/User";
 import { CycleService } from "@/services/CycleService";
 import { GoalService } from "@/services/GoalService";
 import { AuditService } from "@/services/AuditService";
+import { NotificationService } from "@/services/NotificationService";
 import type { AuditActor } from "@/types/audit";
 import type {
   CheckInGoalDto,
@@ -323,6 +324,17 @@ export class CheckInService {
       actor,
     });
 
+    const sheet = await GoalSheet.findById(update.goalSheetId).lean();
+    const employee = await User.findById(employeeId).lean();
+    if (sheet && employee) {
+      NotificationService.notifyCheckInUpdate({
+        orgId: actor.orgId,
+        managerId: sheet.managerId.toString(),
+        employeeName: employee.name,
+        quarter: update.quarter,
+      });
+    }
+
     return serializeQuarterlyCheckIn(update);
   }
 
@@ -368,6 +380,16 @@ export class CheckInService {
       after: AuditService.snapshot(update),
       actor,
     });
+
+    const manager = await User.findById(managerId).lean();
+    if (manager) {
+      NotificationService.notifyCheckInReviewed({
+        orgId: actor.orgId,
+        employeeId: update.employeeId.toString(),
+        managerName: manager.name,
+        quarter: update.quarter,
+      });
+    }
 
     return serializeQuarterlyCheckIn(update);
   }

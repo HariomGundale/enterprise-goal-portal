@@ -7,6 +7,8 @@ import { Goal } from "@/models/Goal";
 import { GoalSheet } from "@/models/GoalSheet";
 import { GoalService } from "@/services/GoalService";
 import { AuditService } from "@/services/AuditService";
+import { NotificationService } from "@/services/NotificationService";
+import { User } from "@/models/User";
 import type { AuditActor } from "@/types/audit";
 import type { ApprovalDecisionInput, ReturnRejectInput } from "@/schemas/approval.schema";
 import type { GoalSheetDto } from "@/types/api";
@@ -128,6 +130,21 @@ export class ApprovalService {
       });
 
       const goals = await GoalService.getGoalsBySheetId(sheetId);
+      const [employee, manager] = await Promise.all([
+        User.findById(updatedSheet!.employeeId).lean(),
+        User.findById(managerId).lean(),
+      ]);
+      if (employee && manager) {
+        NotificationService.notifyGoalDecision({
+          orgId: employee.orgId.toString(),
+          employeeId: employee._id.toString(),
+          employeeEmail: employee.email,
+          employeeName: employee.name,
+          managerName: manager.name,
+          status: "approved",
+          comment: input.comment,
+        });
+      }
       return serializeGoalSheet(updatedSheet!, goals);
     } finally {
       await session.endSession();
@@ -165,6 +182,21 @@ export class ApprovalService {
     });
 
     const goals = await GoalService.getGoalsBySheetId(sheetId);
+    const [employee, manager] = await Promise.all([
+      User.findById(sheet.employeeId).lean(),
+      User.findById(managerId).lean(),
+    ]);
+    if (employee && manager) {
+      NotificationService.notifyGoalDecision({
+        orgId: employee.orgId.toString(),
+        employeeId: employee._id.toString(),
+        employeeEmail: employee.email,
+        employeeName: employee.name,
+        managerName: manager.name,
+        status: "returned",
+        comment: input.comment,
+      });
+    }
     return serializeGoalSheet(sheet, goals);
   }
 
@@ -199,6 +231,21 @@ export class ApprovalService {
     });
 
     const goals = await GoalService.getGoalsBySheetId(sheetId);
+    const [employee, manager] = await Promise.all([
+      User.findById(sheet.employeeId).lean(),
+      User.findById(managerId).lean(),
+    ]);
+    if (employee && manager) {
+      NotificationService.notifyGoalDecision({
+        orgId: employee.orgId.toString(),
+        employeeId: employee._id.toString(),
+        employeeEmail: employee.email,
+        employeeName: employee.name,
+        managerName: manager.name,
+        status: "rejected",
+        comment: input.comment,
+      });
+    }
     return serializeGoalSheet(sheet, goals);
   }
 }

@@ -1,10 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Bell, LogOut, Menu } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ROLE_LABELS } from "@/constants/navigation";
+import { QUERY_KEYS } from "@/constants/query-keys";
+import { apiFetch } from "@/lib/api-client";
 import type { SessionUser } from "@/types";
 import { toast } from "sonner";
 
@@ -16,6 +20,11 @@ interface NavbarProps {
 
 export function Navbar({ user, title, onMenuClick }: NavbarProps) {
   const router = useRouter();
+
+  const { data: cycleData } = useQuery({
+    queryKey: QUERY_KEYS.activeCycle,
+    queryFn: () => apiFetch<{ cycle: { name: string; status: string } }>("/api/cycles/active"),
+  });
 
   async function handleLogout() {
     try {
@@ -41,14 +50,15 @@ export function Navbar({ user, title, onMenuClick }: NavbarProps) {
         </Button>
         <div>
           <h1 className="text-lg font-semibold text-neutral-900">{title}</h1>
-          <p className="text-xs text-neutral-500">FY2025 · Q2 Active</p>
+          <p className="text-xs text-neutral-500">
+            {cycleData?.cycle?.name ?? "FY2025"}
+            {cycleData?.cycle?.status ? ` · ${cycleData.cycle.status}` : ""}
+          </p>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="h-5 w-5" />
-        </Button>
+        <NotificationBell userId={user.id} />
         <Badge variant="secondary" className="hidden sm:inline-flex">
           {ROLE_LABELS[user.role]}
         </Badge>

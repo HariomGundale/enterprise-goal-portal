@@ -62,7 +62,13 @@ export function AnalyticsCharts({ charts }: AnalyticsChartsProps) {
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    fontSize: "12px",
+                  }}
+                />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

@@ -9,6 +9,7 @@ import { User } from "@/models/User";
 import { CycleService } from "@/services/CycleService";
 import { GoalService } from "@/services/GoalService";
 import { AuditService } from "@/services/AuditService";
+import { NotificationService } from "@/services/NotificationService";
 import type { AuditActor } from "@/types/audit";
 import type {
   GoalSheetDto,
@@ -212,6 +213,16 @@ export class GoalSheetService {
       after: AuditService.snapshot(sheet),
       actor,
     });
+
+    const employee = await User.findById(employeeId).lean();
+    if (employee) {
+      NotificationService.notifyGoalSubmitted({
+        orgId: actor.orgId,
+        managerId: sheet.managerId.toString(),
+        employeeName: employee.name,
+        sheetId: sheet._id.toString(),
+      });
+    }
 
     const goalsDto = await GoalService.getGoalsBySheetId(sheet._id.toString());
     return serializeGoalSheet(sheet, goalsDto);

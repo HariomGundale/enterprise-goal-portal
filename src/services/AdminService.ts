@@ -17,6 +17,7 @@ import { AuditLog } from "@/models/AuditLog";
 import { QuarterlyUpdate } from "@/models/QuarterlyUpdate";
 import { CycleService } from "@/services/CycleService";
 import { AuditService } from "@/services/AuditService";
+import { NotificationService } from "@/services/NotificationService";
 import type { AuditActor } from "@/types/audit";
 import type {
   AdminDepartmentDto,
@@ -502,6 +503,12 @@ export class AdminService {
       before,
       after: AuditService.snapshot(sheet),
       actor,
+    });
+
+    NotificationService.notifySheetUnlocked({
+      orgId,
+      employeeId: sheet.employeeId.toString(),
+      reason,
     });
   }
 }

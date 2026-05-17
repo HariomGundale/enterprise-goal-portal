@@ -257,6 +257,22 @@ export interface SharedGoalDto {
   createdAt: string;
 }
 
+export interface NotificationDto {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  link: string;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationsResponse {
+  notifications: NotificationDto[];
+  unreadCount: number;
+}
+
 export interface UserBriefDto {
   id: string;
   name: string;
