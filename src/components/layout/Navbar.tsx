@@ -9,6 +9,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { ROLE_LABELS } from "@/constants/navigation";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { apiFetch } from "@/lib/api-client";
+import { outlineActionHoverClassName } from "@/lib/utils";
 import type { SessionUser } from "@/types";
 import { toast } from "sonner";
 
@@ -37,7 +38,7 @@ export function Navbar({ user, title, onMenuClick }: NavbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-card/80 lg:px-6">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -49,20 +50,25 @@ export function Navbar({ user, title, onMenuClick }: NavbarProps) {
           <Menu className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900">{title}</h1>
-          <p className="text-xs text-neutral-500">
+          <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+          <p className="text-xs text-muted">
             {cycleData?.cycle?.name ?? "FY2025"}
             {cycleData?.cycle?.status ? ` · ${cycleData.cycle.status}` : ""}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <NotificationBell userId={user.id} />
         <Badge variant="secondary" className="hidden sm:inline-flex">
           {ROLE_LABELS[user.role]}
         </Badge>
-        <Button variant="outline" size="sm" onClick={handleLogout}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          className={outlineActionHoverClassName}
+        >
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline">Sign out</span>
         </Button>

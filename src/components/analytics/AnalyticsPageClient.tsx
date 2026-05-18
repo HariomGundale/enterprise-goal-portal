@@ -48,16 +48,20 @@ export function AnalyticsPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-neutral-900">Analytics</h2>
-          <p className="text-sm text-neutral-500">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold text-neutral-900 dark:text-slate-100">Analytics</h2>
+            <Badge variant="secondary" className="shrink-0">
+              {SCOPE_LABELS[scope]}
+            </Badge>
+          </div>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-slate-400">
             {SCOPE_LABELS[scope]} view
             {session ? ` · ${ROLE_LABELS[session.role]}` : ""}
             {cycle ? ` · ${cycle.name}` : ""}
           </p>
         </div>
-        <Badge variant="secondary">{SCOPE_LABELS[scope]}</Badge>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

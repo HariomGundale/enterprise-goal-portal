@@ -92,12 +92,18 @@ export class GoalSheetService {
     }
 
     const goals = await GoalService.getGoalsBySheetId(sheet._id.toString());
-    return serializeGoalSheet(sheet, goals, {
-      id: employee._id.toString(),
-      name: employee.name,
-      email: employee.email,
-      employeeId: employee.employeeId,
-    });
+    const manager = await User.findById(sheet.managerId).lean();
+    return serializeGoalSheet(
+      sheet,
+      goals,
+      {
+        id: employee._id.toString(),
+        name: employee.name,
+        email: employee.email,
+        employeeId: employee.employeeId,
+      },
+      manager ? { id: manager._id.toString(), name: manager.name } : null,
+    );
   }
 
   static async getMySheet(employeeId: string, orgId: string): Promise<GoalSheetDto | null> {
@@ -111,6 +117,7 @@ export class GoalSheetService {
     if (!sheet) return null;
 
     const employee = await User.findById(employeeId).lean();
+    const manager = await User.findById(sheet.managerId).lean();
     const goals = await GoalService.getGoalsBySheetId(sheet._id.toString());
 
     return serializeGoalSheet(
@@ -124,6 +131,7 @@ export class GoalSheetService {
             employeeId: employee.employeeId,
           }
         : undefined,
+      manager ? { id: manager._id.toString(), name: manager.name } : null,
     );
   }
 

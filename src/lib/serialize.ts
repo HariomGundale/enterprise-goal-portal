@@ -62,6 +62,7 @@ export function serializeGoalSheet(
   sheet: unknown,
   goals: GoalDto[] = [],
   employee?: GoalSheetDto["employee"],
+  manager?: GoalSheetDto["manager"],
 ): GoalSheetDto {
   const s = toPlain(sheet);
   return {
@@ -76,8 +77,10 @@ export function serializeGoalSheet(
     approvedAt: s.approvedAt ? new Date(s.approvedAt as Date).toISOString() : null,
     managerComment: s.managerComment ? String(s.managerComment) : null,
     version: Number(s.version ?? 1),
+    updatedAt: s.updatedAt ? new Date(s.updatedAt as Date).toISOString() : null,
     goals,
     employee,
+    manager: manager ?? undefined,
   };
 }
 

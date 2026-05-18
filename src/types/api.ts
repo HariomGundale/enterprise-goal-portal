@@ -44,8 +44,10 @@ export interface GoalSheetDto {
   approvedAt: string | null;
   managerComment: string | null;
   version: number;
+  updatedAt?: string | null;
   goals: GoalDto[];
   employee?: { id: string; name: string; email: string; employeeId: string };
+  manager?: { id: string; name: string } | null;
 }
 
 export interface GoalSheetSummaryDto {

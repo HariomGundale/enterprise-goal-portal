@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { apiFetch } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
+import { cn, outlineActionHoverClassName } from "@/lib/utils";
 import { useSession } from "@/hooks/use-session";
 import type { NotificationsResponse } from "@/types/api";
 
@@ -77,6 +77,7 @@ export function NotificationsPageClient() {
           <Button
             variant="outline"
             size="sm"
+            className={outlineActionHoverClassName}
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
           >

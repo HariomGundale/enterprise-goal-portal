@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { ApiError } from "@/lib/api-error";
@@ -148,6 +149,84 @@ export class AdminService {
         mgr ? { id: mgr._id.toString(), name: mgr.name } : null,
       );
     });
+  }
+
+  static async createUser(
+    orgId: string,
+    input: {
+      name: string;
+      email: string;
+      employeeId: string;
+      password: string;
+      role: UserRole;
+      departmentId: string;
+      managerId?: string | null;
+    },
+    actor: AuditActor,
+  ): Promise<AdminUserDto> {
+    await connectDB();
+
+    const email = input.email.toLowerCase().trim();
+    const existing = await User.findOne({ email });
+    if (existing) {
+      throw new ApiError(409, "EMAIL_EXISTS", "A user with this email already exists");
+    }
+
+    const empIdTaken = await User.findOne({
+      orgId: new mongoose.Types.ObjectId(orgId),
+      employeeId: input.employeeId.trim(),
+    });
+    if (empIdTaken) {
+      throw new ApiError(409, "EMPLOYEE_ID_EXISTS", "Employee ID is already in use");
+    }
+
+    const dept = await Department.findOne({
+      _id: input.departmentId,
+      orgId: new mongoose.Types.ObjectId(orgId),
+    });
+    if (!dept) throw new ApiError(404, "NOT_FOUND", "Department not found");
+
+    let managerId: mongoose.Types.ObjectId | null = null;
+    if (input.managerId) {
+      const mgr = await User.findOne({
+        _id: input.managerId,
+        orgId: new mongoose.Types.ObjectId(orgId),
+        role: { $in: ["manager", "admin"] },
+      });
+      if (!mgr) {
+        throw new ApiError(400, "INVALID_MANAGER", "Manager must be an active manager or admin");
+      }
+      managerId = mgr._id;
+    }
+
+    const passwordHash = await bcrypt.hash(input.password, 12);
+    const user = await User.create({
+      orgId: new mongoose.Types.ObjectId(orgId),
+      employeeId: input.employeeId.trim(),
+      name: input.name.trim(),
+      email,
+      passwordHash,
+      role: input.role,
+      departmentId: dept._id,
+      managerId,
+      isActive: true,
+    });
+
+    await AuditService.log({
+      action: "USER_CREATED",
+      entity: "user",
+      entityId: user._id.toString(),
+      before: null,
+      after: AuditService.snapshot(user),
+      actor,
+    });
+
+    const mgr = managerId ? await User.findById(managerId).lean() : null;
+    return serializeAdminUser(
+      user,
+      { id: dept._id.toString(), name: dept.name, code: dept.code },
+      mgr ? { id: mgr._id.toString(), name: mgr.name } : null,
+    );
   }
 
   static async updateUser(

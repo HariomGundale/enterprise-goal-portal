@@ -49,7 +49,7 @@ export function CheckinGoalTimeline({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-3 overflow-x-auto pb-1">
+        <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4">
           {QUARTERS.map((q) => {
             const checkIn = item.quarters.find((c) => c.quarter === q);
             if (!checkIn) return null;

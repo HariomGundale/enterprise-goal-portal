@@ -20,7 +20,17 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <Toaster position="bottom-right" richColors closeButton duration={4000} />
+      <Toaster
+        position="top-center"
+        richColors
+        closeButton
+        duration={4000}
+        toastOptions={{
+          classNames: {
+            toast: "animate-dialog-in shadow-lg border border-neutral-200 bg-white",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

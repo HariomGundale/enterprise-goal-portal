@@ -7,6 +7,7 @@ import { Plus, RotateCcw, Send } from "lucide-react";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { REQUIRED_TOTAL_WEIGHTAGE, DEFAULT_MAX_GOALS } from "@/constants/goals";
 import { apiFetch, ApiClientError } from "@/lib/api-client";
+import { outlineActionHoverClassName } from "@/lib/utils";
 import type { CycleDto, GoalDto, GoalSheetDto } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { GoalStatusChip } from "@/components/goals/GoalStatusChip";
 import { GoalTable } from "@/components/goals/GoalTable";
 import { WeightageBar } from "@/components/goals/WeightageBar";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { ManagerReworkBanner } from "@/components/goals/ManagerReworkBanner";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useSession } from "@/hooks/use-session";
 import type { GoalSheetStatus } from "@/types";
@@ -119,7 +121,7 @@ export function GoalsPageClient() {
         method: "PATCH",
       }),
     onSuccess: () => {
-      toast.success("Goal sheet submitted for approval");
+      toast.success("Goal sheet submitted for approval", { position: "top-center" });
       setSubmitOpen(false);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.goalSheet("my") });
     },
@@ -196,17 +198,14 @@ export function GoalsPageClient() {
     <div className="space-y-6">
       {cycle ? <CycleBanner cycle={cycle} /> : null}
 
+      {sheet.status === "returned" ? <ManagerReworkBanner sheet={sheet} /> : null}
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-neutral-900">My Goal Sheet</h2>
             <GoalStatusChip status={sheet.status} />
           </div>
-          {sheet.managerComment && sheet.status === "returned" ? (
-            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
-              Manager feedback: {sheet.managerComment}
-            </p>
-          ) : null}
           {sheet.status === "approved" ? (
             <p className="mt-2 text-sm text-neutral-600">
               This cycle&apos;s goal sheet is approved and locked. Use &quot;Start new sheet&quot; to
@@ -218,6 +217,7 @@ export function GoalsPageClient() {
           {canResetSheet ? (
             <Button
               variant="outline"
+              className={outlineActionHoverClassName}
               onClick={() => {
                 if (
                   confirm(

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { apiFetch } from "@/lib/api-client";
 import type { NotificationsResponse } from "@/types/api";
-import { cn } from "@/lib/utils";
+import { cn, outlineActionHoverClassName } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 const TYPE_COLORS: Record<string, string> = {
@@ -82,7 +82,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         aria-label={`Notifications${unread > 0 ? `, ${unread} unread` : ""}`}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="relative"
+        className={cn("relative", outlineActionHoverClassName)}
       >
         <Bell className="h-5 w-5" />
         {unread > 0 ? (
@@ -97,14 +97,16 @@ export function NotificationBell({ userId }: NotificationBellProps) {
           <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
             <p className="text-sm font-semibold text-neutral-900">Notifications</p>
             {unread > 0 ? (
-              <button
+              <Button
                 type="button"
-                className="flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700"
+                variant="outline"
+                size="sm"
+                className={cn("h-8 px-2 text-xs", outlineActionHoverClassName)}
                 onClick={() => markAllRead.mutate()}
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 Mark all read
-              </button>
+              </Button>
             ) : null}
           </div>
 

@@ -31,7 +31,7 @@ export function AnalyticsCharts({ charts }: AnalyticsChartsProps) {
 
   if (!hasData) {
     return (
-      <p className="rounded-xl border border-dashed border-neutral-200 bg-white px-6 py-12 text-center text-sm text-neutral-500">
+      <p className="rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center text-sm text-muted">
         Charts will populate once employees submit goals and check-ins.
       </p>
     );

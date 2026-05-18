@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@/lib/middleware/with-auth";
+import { toAuditActor } from "@/lib/request-meta";
 import { PERMISSIONS } from "@/lib/permissions";
-import { adminUserQuerySchema } from "@/schemas/admin.schema";
+import { adminUserQuerySchema, createAdminUserSchema } from "@/schemas/admin.schema";
 import { AdminService } from "@/services/AdminService";
 
 export const GET = withAuth(
@@ -17,6 +18,24 @@ export const GET = withAuth(
     });
 
     return NextResponse.json({ users });
+  },
+  { roles: PERMISSIONS.ADMIN.USER_MANAGEMENT },
+);
+
+export const POST = withAuth(
+  async (req: NextRequest, { user }) => {
+    const body = await req.json();
+    const parsed = createAdminUserSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "VALIDATION_ERROR", message: "Invalid user data", details: parsed.error.flatten() },
+        { status: 400 },
+      );
+    }
+
+    const actor = toAuditActor(user, req);
+    const created = await AdminService.createUser(user.orgId, parsed.data, actor);
+    return NextResponse.json({ user: created }, { status: 201 });
   },
   { roles: PERMISSIONS.ADMIN.USER_MANAGEMENT },
 );

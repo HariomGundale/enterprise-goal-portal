@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -34,37 +35,58 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const [comment, setComment] = useState("");
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
-  }, [open]);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) setComment("");
   }, [open]);
 
-  return (
-    <dialog
-      ref={dialogRef}
-      className="w-full max-w-md rounded-xl border border-neutral-200 bg-white p-0 shadow-xl backdrop:bg-black/40"
-      onClose={onCancel}
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onCancel]);
+
+  if (!open || !mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      role="presentation"
     >
-      <form
-        method="dialog"
-        className="p-6"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (requireComment && !comment.trim()) return;
-          onConfirm(comment.trim() || undefined);
-        }}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        aria-hidden
+        onClick={onCancel}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        className={cn(
+          "relative z-[101] w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 shadow-2xl",
+          "animate-dialog-in dark:border-slate-700 dark:bg-slate-900",
+        )}
+        onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
-        <p className="mt-2 text-sm text-neutral-500">{description}</p>
+        <h2
+          id="confirm-dialog-title"
+          className="text-lg font-semibold text-neutral-900 dark:text-slate-100"
+        >
+          {title}
+        </h2>
+        <p className="mt-2 text-sm text-neutral-500 dark:text-slate-400">{description}</p>
 
         {requireComment || optionalComment ? (
           <div className="mt-4 space-y-2">
@@ -72,8 +94,9 @@ export function ConfirmDialog({
             <textarea
               id="confirm-comment"
               className={cn(
-                "flex min-h-[80px] w-full rounded-md border border-neutral-200 px-3 py-2 text-sm",
+                "flex min-h-[80px] w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                "dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
               )}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -87,19 +110,21 @@ export function ConfirmDialog({
           </div>
         ) : null}
 
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
             {cancelLabel}
           </Button>
           <Button
-            type="submit"
+            type="button"
             variant={variant === "destructive" ? "destructive" : "default"}
             disabled={loading || (requireComment && !comment.trim())}
+            onClick={() => onConfirm(comment.trim() || undefined)}
           >
             {loading ? "Processing..." : confirmLabel}
           </Button>
         </div>
-      </form>
-    </dialog>
+      </div>
+    </div>,
+    document.body,
   );
 }

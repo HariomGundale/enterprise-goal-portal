@@ -18,6 +18,26 @@ export const adminUserQuerySchema = z.object({
   active: z.enum(["true", "false"]).optional(),
 });
 
+export const createAdminUserSchema = z
+  .object({
+    name: z.string().min(2).max(120),
+    email: z.string().email(),
+    employeeId: z.string().min(2).max(30),
+    password: z.string().min(8).max(128),
+    role: z.enum(["employee", "manager", "admin"]),
+    departmentId: z.string().min(1),
+    managerId: z.string().nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.role === "employee" && !data.managerId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Employees must have a manager assigned",
+        path: ["managerId"],
+      });
+    }
+  });
+
 export const updateAdminUserSchema = z.object({
   isActive: z.boolean().optional(),
   role: z.enum(["employee", "manager", "admin"]).optional(),
@@ -64,6 +84,7 @@ export const unlockGoalSheetSchema = z.object({
   reason: z.string().min(3).max(500),
 });
 
+export type CreateAdminUserInput = z.infer<typeof createAdminUserSchema>;
 export type CreateDepartmentInput = z.infer<typeof createDepartmentSchema>;
 export type UpdateDepartmentInput = z.infer<typeof updateDepartmentSchema>;
 export type CreateCycleInput = z.infer<typeof createCycleSchema>;
