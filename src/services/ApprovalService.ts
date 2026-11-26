@@ -16,9 +16,9 @@ import type { GoalSheetDto } from "@/types/api";
 const REVIEWABLE_STATUSES = ["submitted", "under_review"] as const;
 
 export class ApprovalService {
-  static async assertManagerAccess(sheetId: string, managerId: string, role: string) {
+  static async assertManagerAccess(sheetId: string, managerId: string, role: string, orgId: string) {
     const sheet = await GoalSheet.findById(sheetId);
-    if (!sheet) {
+    if (!sheet || sheet.orgId.toString() !== orgId) {
       throw new ApiError(404, "NOT_FOUND", "Goal sheet not found");
     }
     if (role !== "admin" && sheet.managerId.toString() !== managerId) {
@@ -68,7 +68,7 @@ export class ApprovalService {
     actor: AuditActor,
   ): Promise<GoalSheetDto> {
     await connectDB();
-    const sheet = await this.assertManagerAccess(sheetId, managerId, role);
+    const sheet = await this.assertManagerAccess(sheetId, managerId, role, actor.orgId);
 
     if (!REVIEWABLE_STATUSES.includes(sheet.status as (typeof REVIEWABLE_STATUSES)[number])) {
       throw new ApiError(409, "INVALID_STATUS", `Cannot approve sheet in status: ${sheet.status}`);
@@ -159,7 +159,7 @@ export class ApprovalService {
     actor: AuditActor,
   ): Promise<GoalSheetDto> {
     await connectDB();
-    const sheet = await this.assertManagerAccess(sheetId, managerId, role);
+    const sheet = await this.assertManagerAccess(sheetId, managerId, role, actor.orgId);
 
     if (!REVIEWABLE_STATUSES.includes(sheet.status as (typeof REVIEWABLE_STATUSES)[number])) {
       throw new ApiError(409, "INVALID_STATUS", `Cannot return sheet in status: ${sheet.status}`);
@@ -208,7 +208,7 @@ export class ApprovalService {
     actor: AuditActor,
   ): Promise<GoalSheetDto> {
     await connectDB();
-    const sheet = await this.assertManagerAccess(sheetId, managerId, role);
+    const sheet = await this.assertManagerAccess(sheetId, managerId, role, actor.orgId);
 
     if (!REVIEWABLE_STATUSES.includes(sheet.status as (typeof REVIEWABLE_STATUSES)[number])) {
       throw new ApiError(409, "INVALID_STATUS", `Cannot reject sheet in status: ${sheet.status}`);

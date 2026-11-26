@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -58,8 +58,7 @@ export function AdminUsersSection() {
       toast.error(err instanceof ApiClientError ? err.message : "Update failed"),
   });
 
-  const users = usersQuery.data?.users ?? [];
-  const filtered = useMemo(() => users, [users]);
+  const filtered = usersQuery.data?.users ?? [];
 
   if (usersQuery.isLoading && !usersQuery.data) {
     return <div className="h-48 animate-pulse rounded-xl bg-neutral-200" />;

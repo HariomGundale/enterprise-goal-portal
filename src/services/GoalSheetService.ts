@@ -5,6 +5,8 @@ import { serializeGoalSheet, serializeGoalSheetSummary } from "@/lib/serialize";
 import { REQUIRED_TOTAL_WEIGHTAGE } from "@/constants/goals";
 import { Goal } from "@/models/Goal";
 import { GoalSheet } from "@/models/GoalSheet";
+import { QuarterlyUpdate } from "@/models/QuarterlyUpdate";
+import { SharedGoal } from "@/models/SharedGoal";
 import { User } from "@/models/User";
 import { CycleService } from "@/services/CycleService";
 import { GoalService } from "@/services/GoalService";
@@ -139,10 +141,11 @@ export class GoalSheetService {
     sheetId: string,
     requesterId: string,
     requesterRole: string,
+    requesterOrgId: string,
   ): Promise<GoalSheetDto> {
     await connectDB();
     const sheet = await GoalSheet.findById(sheetId);
-    if (!sheet) {
+    if (!sheet || sheet.orgId.toString() !== requesterOrgId) {
       throw new ApiError(404, "NOT_FOUND", "Goal sheet not found");
     }
 
@@ -342,8 +345,18 @@ export class GoalSheetService {
     }
 
     const before = AuditService.snapshot(sheet);
-    await Goal.deleteMany({ goalSheetId: sheet._id });
-    await GoalSheet.deleteOne({ _id: sheet._id });
+    const goalIds = await Goal.find({ goalSheetId: sheet._id }).distinct("_id");
+    await Promise.all([
+      QuarterlyUpdate.deleteMany({ goalSheetId: sheet._id }),
+      goalIds.length > 0
+        ? SharedGoal.updateMany(
+            { "recipients.goalId": { $in: goalIds } },
+            { $pull: { recipients: { goalId: { $in: goalIds } } } },
+          )
+        : Promise.resolve(),
+      Goal.deleteMany({ goalSheetId: sheet._id }),
+      GoalSheet.deleteOne({ _id: sheet._id }),
+    ]);
 
     await AuditService.log({
       action: "GOAL_SHEET_RESET",

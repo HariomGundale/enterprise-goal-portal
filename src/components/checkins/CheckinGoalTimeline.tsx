@@ -68,7 +68,7 @@ export function CheckinGoalTimeline({
 
         {selectedCheckIn?.id ? (
           <CheckinUpdateForm
-            key={selectedCheckIn.id}
+            key={`${selectedCheckIn.id}-${selectedCheckIn.updatedAt}`}
             checkIn={selectedCheckIn}
             readOnly={readOnly}
             loading={saveLoading}

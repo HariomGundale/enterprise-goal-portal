@@ -141,11 +141,13 @@ export class AdminService {
     const mgrMap = new Map(managers.map((m) => [m._id.toString(), m]));
 
     return users.map((u) => {
-      const dept = deptMap.get(u.departmentId.toString())!;
+      const dept = deptMap.get(u.departmentId.toString());
       const mgr = u.managerId ? mgrMap.get(u.managerId.toString()) : null;
       return serializeAdminUser(
         u,
-        { id: dept._id.toString(), name: dept.name, code: dept.code },
+        dept
+          ? { id: dept._id.toString(), name: dept.name, code: dept.code }
+          : { id: u.departmentId.toString(), name: "Unknown", code: "—" },
         mgr ? { id: mgr._id.toString(), name: mgr.name } : null,
       );
     });
@@ -277,7 +279,9 @@ export class AdminService {
 
     return serializeAdminUser(
       user,
-      { id: dept!._id.toString(), name: dept!.name, code: dept!.code },
+      dept
+        ? { id: dept._id.toString(), name: dept.name, code: dept.code }
+        : { id: user.departmentId.toString(), name: "Unknown", code: "—" },
       mgr ? { id: mgr._id.toString(), name: mgr.name } : null,
     );
   }

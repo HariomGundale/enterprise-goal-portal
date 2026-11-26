@@ -92,9 +92,6 @@ export class AnalyticsService {
       PENDING.includes(s.status as (typeof PENDING)[number]),
     ).length;
     const draft = sheets.filter((s) => s.status === "draft").length;
-    const decided = sheets.filter((s) =>
-      ["approved", "rejected"].includes(s.status),
-    ).length;
     const approvalRate =
       sheets.length > 0 ? Math.round((approved / sheets.length) * 100) : 0;
 

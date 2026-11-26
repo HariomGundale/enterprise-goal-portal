@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { QuarterlyCheckInDto } from "@/types/api";
 import type { ProgressStatus } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -44,13 +44,6 @@ export function CheckinUpdateForm({
   const [status, setStatus] = useState<ProgressStatus>(checkIn.progressStatus);
   const [comment, setComment] = useState(checkIn.employeeComment ?? "");
   const [managerComment, setManagerComment] = useState("");
-
-  useEffect(() => {
-    setActual(checkIn.actualAchievement != null ? String(checkIn.actualAchievement) : "");
-    setPercent(checkIn.progressPercent != null ? String(checkIn.progressPercent) : "");
-    setStatus(checkIn.progressStatus);
-    setComment(checkIn.employeeComment ?? "");
-  }, [checkIn]);
 
   const employeeLocked = readOnly || checkIn.isReviewed;
 

@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -23,26 +27,14 @@ interface ConfirmDialogProps {
 
 export function ConfirmDialog({
   open,
-  title,
-  description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  variant = "default",
-  requireComment = false,
-  optionalComment = false,
-  commentLabel = "Comment",
-  loading = false,
-  onConfirm,
   onCancel,
+  ...rest
 }: ConfirmDialogProps) {
-  const [comment, setComment] = useState("");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    if (!open) setComment("");
-  }, [open]);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -61,6 +53,27 @@ export function ConfirmDialog({
   if (!open || !mounted) return null;
 
   return createPortal(
+    <ConfirmDialogContent onCancel={onCancel} {...rest} />,
+    document.body,
+  );
+}
+
+function ConfirmDialogContent({
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  variant = "default",
+  requireComment = false,
+  optionalComment = false,
+  commentLabel = "Comment",
+  loading = false,
+  onConfirm,
+  onCancel,
+}: Omit<ConfirmDialogProps, "open">) {
+  const [comment, setComment] = useState("");
+
+  return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
       role="presentation"
@@ -124,7 +137,6 @@ export function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>,
-    document.body,
+    </div>
   );
 }

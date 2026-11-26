@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { ACCESS_TOKEN_COOKIE, verifyAccessToken } from "@/lib/auth";
 import { ApiError } from "@/lib/api-error";
+import { connectDB } from "@/lib/db";
+import { User } from "@/models/User";
 import type { TokenPayload } from "@/types";
 
 export async function authenticateRequest(): Promise<TokenPayload> {
@@ -16,5 +18,21 @@ export async function authenticateRequest(): Promise<TokenPayload> {
     throw new ApiError(401, "UNAUTHORIZED", "Session expired. Please sign in again.");
   }
 
-  return payload;
+  await connectDB();
+  const user = await User.findById(payload.userId)
+    .select("email role departmentId managerId orgId isActive")
+    .lean();
+
+  if (!user || !user.isActive) {
+    throw new ApiError(401, "UNAUTHORIZED", "User session is no longer active");
+  }
+
+  return {
+    userId: payload.userId,
+    email: user.email,
+    role: user.role,
+    departmentId: user.departmentId.toString(),
+    managerId: user.managerId ? user.managerId.toString() : null,
+    orgId: user.orgId.toString(),
+  };
 }

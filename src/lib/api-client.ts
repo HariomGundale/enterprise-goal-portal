@@ -10,14 +10,45 @@ export class ApiClientError extends Error {
   }
 }
 
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefreshSession(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    })
+      .then((r) => r.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
 export async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
-  });
+  const doFetch = () =>
+    fetch(url, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...init?.headers,
+      },
+    });
+
+  let res = await doFetch();
+
+  if (
+    res.status === 401 &&
+    !url.startsWith("/api/auth/login") &&
+    !url.startsWith("/api/auth/refresh")
+  ) {
+    const refreshed = await tryRefreshSession();
+    if (refreshed) {
+      res = await doFetch();
+    }
+  }
 
   const data = await res.json().catch(() => ({}));
 

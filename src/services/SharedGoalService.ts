@@ -151,7 +151,7 @@ export class SharedGoalService {
     }
 
     const cycle = await CycleService.getActiveCycle(orgId);
-    let sheet = await GoalSheet.findOne({
+    const sheet = await GoalSheet.findOne({
       employeeId: employee._id,
       cycleId: cycle._id,
     });

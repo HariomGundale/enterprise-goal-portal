@@ -6,8 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src",
     "type-check": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
     "seed": "tsx src/scripts/seed.ts",
     "fix-cycle": "tsx src/scripts/fix-cycle-window.ts"
   },

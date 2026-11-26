@@ -59,7 +59,10 @@ export function ApprovalsPageClient() {
     enabled: !!selectedId,
   });
 
-  const sheets = teamQuery.data?.sheets ?? [];
+  const sheets = useMemo(
+    () => teamQuery.data?.sheets ?? [],
+    [teamQuery.data?.sheets],
+  );
   const stats = teamQuery.data?.stats;
 
   const filteredSheets = useMemo(() => {

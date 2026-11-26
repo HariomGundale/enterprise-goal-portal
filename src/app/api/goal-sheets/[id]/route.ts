@@ -7,6 +7,11 @@ export const GET = withAuth(async (_req, { user, params }) => {
   if (!sheetId) {
     return NextResponse.json({ error: "MISSING_ID", message: "Sheet id required" }, { status: 400 });
   }
-  const sheet = await GoalSheetService.getSheetById(sheetId, user.userId, user.role);
+  const sheet = await GoalSheetService.getSheetById(
+    sheetId,
+    user.userId,
+    user.role,
+    user.orgId,
+  );
   return NextResponse.json({ sheet });
 });

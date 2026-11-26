@@ -9,7 +9,6 @@ import type { AdminGoalSheetDto } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { GoalStatusChip } from "@/components/goals/GoalStatusChip";
 
 export function AdminUnlockSection() {

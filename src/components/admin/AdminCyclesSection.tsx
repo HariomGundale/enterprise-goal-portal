@@ -37,7 +37,7 @@ export function AdminCyclesSection() {
   const [fy, setFy] = useState(String(new Date().getFullYear()));
   const [goalStart, setGoalStart] = useState("");
   const [goalEnd, setGoalEnd] = useState("");
-  const [quarters, setQuarters] = useState(defaultQuarters);
+  const [quarters] = useState(defaultQuarters);
 
   const cyclesQuery = useQuery({
     queryKey: QUERY_KEYS.adminCycles,

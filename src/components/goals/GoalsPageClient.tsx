@@ -147,10 +147,9 @@ export function GoalsPageClient() {
 
   const canResetSheet =
     sheet &&
-    (sheet.status === "approved" ||
-      sheet.status === "rejected" ||
+    (sheet.status === "rejected" ||
       (process.env.NODE_ENV === "development" &&
-        ["draft", "returned"].includes(sheet.status)));
+        ["approved", "draft", "returned"].includes(sheet.status)));
 
   if (loading) {
     return (
@@ -208,8 +207,9 @@ export function GoalsPageClient() {
           </div>
           {sheet.status === "approved" ? (
             <p className="mt-2 text-sm text-neutral-600">
-              This cycle&apos;s goal sheet is approved and locked. Use &quot;Start new sheet&quot; to
-              reset for demo, or wait for the next performance cycle.
+              {canResetSheet
+                ? 'This cycle\'s goal sheet is approved and locked. Use "Start new sheet" to reset for demo, or wait for the next performance cycle.'
+                : "This cycle's goal sheet is approved and locked. Contact HR admin if an unlock is required."}
             </p>
           ) : null}
         </div>

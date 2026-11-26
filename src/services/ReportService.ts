@@ -6,7 +6,6 @@ import { GoalSheet } from "@/models/GoalSheet";
 import { Goal } from "@/models/Goal";
 import { User } from "@/models/User";
 import { Department } from "@/models/Department";
-import { QuarterlyUpdate } from "@/models/QuarterlyUpdate";
 import { CycleService } from "@/services/CycleService";
 import { AnalyticsService } from "@/services/AnalyticsService";
 import type { UserRole } from "@/types";
@@ -53,7 +52,7 @@ export class ReportService {
         orgId: new mongoose.Types.ObjectId(orgId),
         managerId: new mongoose.Types.ObjectId(userId),
       }).lean();
-      return reports.map((r) => r._id);
+      return [...reports.map((r) => r._id), new mongoose.Types.ObjectId(userId)];
     }
     return [new mongoose.Types.ObjectId(userId)];
   }

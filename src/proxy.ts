@@ -4,7 +4,13 @@ import { ACCESS_TOKEN_COOKIE } from "@/lib/auth";
 import { ROUTE_PERMISSIONS } from "@/lib/permissions";
 import type { UserRole } from "@/types";
 
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/refresh", "/unauthorized"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/api/auth/login",
+  "/api/auth/refresh",
+  "/api/health",
+  "/unauthorized",
+];
 
 function getSecret(): Uint8Array | null {
   const secret = process.env.JWT_ACCESS_SECRET;
@@ -45,8 +51,7 @@ export async function proxy(req: NextRequest) {
 
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon") ||
-    pathname.includes(".")
+    pathname.startsWith("/favicon")
   ) {
     return NextResponse.next();
   }
@@ -111,5 +116,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)",
+  ],
 };

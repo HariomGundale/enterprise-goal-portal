@@ -265,7 +265,7 @@ export class CheckInService {
     await connectDB();
 
     const employee = await User.findById(employeeId).lean();
-    if (!employee) {
+    if (!employee || employee.orgId.toString() !== orgId) {
       throw new ApiError(404, "NOT_FOUND", "Employee not found");
     }
 
@@ -353,7 +353,7 @@ export class CheckInService {
     }
 
     const sheet = await GoalSheet.findById(update.goalSheetId);
-    if (!sheet) {
+    if (!sheet || sheet.orgId.toString() !== actor.orgId) {
       throw new ApiError(404, "NOT_FOUND", "Goal sheet not found");
     }
 
